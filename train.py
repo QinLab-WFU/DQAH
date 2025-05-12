@@ -17,7 +17,6 @@ import torch
 import torch.backends.cudnn as cudnn
 import json
 from utils.tools import *
-from model.crossformer import CrossFormer
 from model.qformer import QFormer
 from torch.autograd import Variable
 import torch
@@ -31,7 +30,6 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 from relative_similarity import *
 from centroids_generator import *
 import torch.nn.functional as F
-from loss.loss import RelaHashLoss
 torch.manual_seed(3407)
 torch.cuda.manual_seed(3407)
 from timm.scheduler import create_scheduler , CosineLRScheduler
@@ -44,8 +42,6 @@ from loss.acmvh_loss import Acmvh_out
 from loss.losses import bit_var_loss
 from loss.FAST_HPP import HouseHolder
 import q_utils as utils
-
-
 try:
     from apex import amp
     from apex.parallel import DistributedDataParallel as ApexDDP
@@ -57,34 +53,19 @@ except ImportError:
 import warnings
 warnings.filterwarnings("ignore")  # Del ImageNet Warnings
 import os
-# from cmt_args import get_args_parser
-# from swiftformer_args import get_args_parser
 from qFormer_args import get_config as get_configs
 from qFormer_args import parse_option
 from loss.hypbird import margin_contrastive
-def build_model(config, args,bit):
-    model_type = config.MODEL.TYPE
-    if   model_type == 'qformer':
-        model = QFormer()
-    else:
-        raise NotImplementedError(f"Unkown model: {model_type}")
-
-    return model
 def get_config():
     config = {
         "alpha": 0.1,
-
         'info':"[QFormer]",
-
         "step_continuation": 20,
         "resize_size": 256,
         "crop_size": 224,
         "batch_size": 64,
        "datasets": "mirflickr",
-       # "datasets": "cifar10",
-       # "datasets":'nuswide_21',
-        #"datasets":'coco',
-        "Label_dim" : 10, # number_class nuswide:21 coco:80 mirflickr:38
+        "Label_dim" : 10, 
         "epoch": 100,
         "test_map": 0,
         "optimizer": {"type": optim.Adam, "optim_params": {"lr": 1e-5}},
@@ -93,10 +74,6 @@ def get_config():
         'test_device':torch.device("cuda:0"),
         "bit_list": [16],
         "img_size": 224
-
-        
-
-
     }
     config = config_dataset(config)
     return config

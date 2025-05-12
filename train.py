@@ -92,7 +92,7 @@ def get_config():
         "device": torch.device("cuda:0"),
         'test_device':torch.device("cuda:0"),
         "bit_list": [16],
-        "img_size": 224,
+        "img_size": 224
 
         
 
